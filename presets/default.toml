@@ -1,0 +1,54 @@
+[presets.quick]
+description = "Fast phase 1 discovery on top 100 ports, no phase 2"
+ports = "top100"
+concurrency = 1000
+timeout_ms = 600
+rate_limit = 0
+phase2_enabled = false
+phase2_args = []
+
+[presets.standard]
+description = "Standard two-phase scan: top 1000 ports then nmap -sV on open ports"
+ports = "top1000"
+concurrency = 1000
+timeout_ms = 800
+rate_limit = 0
+phase2_enabled = true
+phase2_args = ["-sV"]
+
+[presets.full]
+description = "Comprehensive scan: all 65535 ports then nmap -sV -sC on open ports"
+ports = "1-65535"
+concurrency = 1000
+timeout_ms = 800
+rate_limit = 0
+phase2_enabled = true
+phase2_args = ["-sV", "-sC"]
+
+[presets.stealth]
+description = "Low rate stealth scan with jitter and packet fragmentation"
+ports = "top1000"
+concurrency = 50
+timeout_ms = 1500
+rate_limit = 50
+jitter_ms = 50
+phase2_enabled = true
+phase2_args = ["-sS", "-T2", "-f"]
+
+[presets.web]
+description = "Web service scan: ports 80, 443, 8000-9000 with HTTP inspection scripts"
+ports = "80,443,8000-9000"
+concurrency = 500
+timeout_ms = 1000
+rate_limit = 0
+phase2_enabled = true
+phase2_args = ["-sV", "--script", "http-title,http-headers,ssl-cert"]
+
+[presets.udp]
+description = "Top 50 UDP service scan (nmap engine)"
+ports = "top50udp"
+concurrency = 100
+timeout_ms = 1500
+rate_limit = 100
+phase2_enabled = true
+phase2_args = ["-sU", "-sV"]

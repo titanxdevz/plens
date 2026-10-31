@@ -1,0 +1,63 @@
+.TH PLENS 1 "October 2026" "plens 0.1.0" "PortLens Manual"
+.SH NAME
+plens \- terminal-only server-exposure auditor for operators who run their own VPS/nodes
+.SH SYNOPSIS
+.B plens
+[\fISUBCOMMAND\fR] [\fIOPTIONS\fR]
+.SH DESCRIPTION
+\fBPortLens\fR (\fBplens\fR) is a high-speed, defensive server-exposure auditor. Unlike traditional port scanners that only report open socket states, PortLens correlates inside listening processes with remote reachability, executes strictly safe non-destructive verification probes (e.g. unauthenticated Redis, MongoDB, Elasticsearch, Docker API), scores exposure risk (0-100), tracks baseline drift, and generates copy-paste remediation commands.
+.SH COMMANDS
+.TP
+\fBscan\fR [\fITARGETS...\fR]
+Execute exposure audit on targets. Supports presets (\fBquick\fR, \fBstandard\fR, \fBfull\fR, \fBstealth\fR, \fBweb\fR, \fBudp\fR) and hosting profiles.
+.TP
+\fBself\fR
+Perform inside-vs-outside visibility audit on the local machine.
+.TP
+\fBwatch\fR \fITARGET\fR [\fB--every\fR \fIDURATION\fR]
+Continuously audit target and highlight only detected changes (rolling diff view).
+.TP
+\fBfix\fR \fIID\fR
+Generate copy-paste remediation commands for firewall and service configuration.
+.TP
+\fBexplain\fR \fIPORT|SERVICE\fR
+Offline plain-language knowledge guidance for common network services.
+.TP
+\fBdiff\fR \fIA\fR \fIB\fR
+Compare two scans or scan against baseline with colored drift indicators.
+.TP
+\fBbaseline\fR <set|show|clear> \fITARGET\fR
+Store and inspect expected host states.
+.TP
+\fBschedule\fR <add|list|rm|run>
+Manage automated recurring background audit jobs.
+.TP
+\fBdaemon\fR [\fB--install-systemd\fR]
+Run scheduler daemon or generate systemd service unit.
+.TP
+\fBdoctor\fR
+Verify environment health, privileges, socket limits, and database.
+.TP
+\fBui\fR
+Interactive terminal user interface (Ratatui TUI).
+.SH EXIT CODES
+.TP
+\fB0\fR
+Success / clean audit.
+.TP
+\fB1\fR
+General operational error.
+.TP
+\fB2\fR
+Findings exceeded \fB--fail-on\fR threshold or unexpected baseline drift detected.
+.TP
+\fB3\fR
+Required dependency (nmap) is missing.
+.TP
+\fB4\fR
+Target authorization declined or allowlist violation.
+.TP
+\fB130\fR
+Process interrupted (partial results saved).
+.SH AUTHORS
+PortLens Team. Released under MIT or Apache-2.0.

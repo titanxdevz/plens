@@ -1,0 +1,9 @@
+/target
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+report.html
+report.csv
+report.json
+report.md

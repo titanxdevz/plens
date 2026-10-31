@@ -1,0 +1,169 @@
+- id: redis-noauth
+  match:
+    service: redis
+    probe: noauth
+  severity: critical
+  message: "Redis accepts commands without authentication."
+  why: "Anyone can read/write data and often gain RCE."
+  fix:
+    ufw: "ufw deny 6379"
+    iptables: "iptables -A INPUT -p tcp --dport 6379 ! -s 127.0.0.1 -j DROP"
+    nftables: "nft add rule inet filter input tcp dport 6379 ip saddr != 127.0.0.1 drop"
+    config: "bind 127.0.0.1 ::1\nrequirepass <strong-password>"
+    docker: "ports:\n  - '127.0.0.1:6379:6379'"
+
+- id: mongo-noauth
+  match:
+    service: mongodb
+    probe: noauth
+  severity: critical
+  message: "MongoDB accepts queries and administrative commands without authentication."
+  why: "Full database read/write access is exposed to the internet. Leading cause of automated ransomware drops."
+  fix:
+    ufw: "ufw deny 27017"
+    iptables: "iptables -A INPUT -p tcp --dport 27017 ! -s 127.0.0.1 -j DROP"
+    config: "security:\n  authorization: enabled\nnet:\n  bindIp: 127.0.0.1"
+    docker: "ports:\n  - '127.0.0.1:27017:27017'"
+
+- id: elastic-noauth
+  match:
+    service: elasticsearch
+    probe: noauth
+  severity: critical
+  message: "Elasticsearch cluster is openly accessible without security/xpack authentication."
+  why: "Unauthenticated cluster health, cluster state, and index modification or exfiltration."
+  fix:
+    ufw: "ufw deny 9200"
+    iptables: "iptables -A INPUT -p tcp --dport 9200 ! -s 127.0.0.1 -j DROP"
+    config: "xpack.security.enabled: true\nnetwork.host: 127.0.0.1"
+    docker: "ports:\n  - '127.0.0.1:9200:9200'"
+
+- id: memcached-exposed
+  match:
+    service: memcached
+    probe: open
+  severity: high
+  message: "Memcached is reachable and answers commands remotely."
+  why: "Unauthenticated memory dumping and potential UDP DDoS amplification abuse if UDP is also open."
+  fix:
+    ufw: "ufw deny 11211"
+    iptables: "iptables -A INPUT -p tcp --dport 11211 ! -s 127.0.0.1 -j DROP"
+    config: "-l 127.0.0.1 -U 0"
+
+- id: docker-api-noauth
+  match:
+    service: docker
+    probe: noauth
+  severity: critical
+  message: "Docker daemon TCP socket (2375) is exposed without TLS authentication."
+  why: "Immediate root access to the host node via container escape or container creation with root mounts."
+  fix:
+    ufw: "ufw deny 2375"
+    iptables: "iptables -A INPUT -p tcp --dport 2375 ! -s 127.0.0.1 -j DROP"
+    config: "Configure TLS verification or listen strictly on unix:///var/run/docker.sock"
+
+- id: mysql-remote
+  match:
+    service: mysql
+    probe: open
+  severity: high
+  message: "MySQL / MariaDB database port is exposed to the outside network."
+  why: "Direct exposure invites automated brute force attacks and risks credential stuffing."
+  fix:
+    ufw: "ufw deny 3306"
+    iptables: "iptables -A INPUT -p tcp --dport 3306 ! -s 127.0.0.1 -j DROP"
+    config: "bind-address = 127.0.0.1"
+
+- id: postgres-remote
+  match:
+    service: postgresql
+    probe: open
+  severity: high
+  message: "PostgreSQL database port is exposed to the outside network."
+  why: "Database connection port exposed to internet scans, enabling authentication brute-forcing."
+  fix:
+    ufw: "ufw deny 5432"
+    iptables: "iptables -A INPUT -p tcp --dport 5432 ! -s 127.0.0.1 -j DROP"
+    config: "listen_addresses = 'localhost'\n# In pg_hba.conf, restrict non-local host ranges"
+
+- id: ftp-anonymous
+  match:
+    service: ftp
+    probe: anonymous
+  severity: high
+  message: "FTP server allows anonymous login."
+  why: "Unauthenticated callers can list and potentially download or upload files."
+  fix:
+    ufw: "ufw deny 21"
+    config: "anonymous_enable=NO (vsftpd) or disable anonymous user"
+
+- id: telnet-exposed
+  match:
+    service: telnet
+    probe: open
+  severity: high
+  message: "Telnet service is exposed to the network in plain text."
+  why: "Telnet sends credentials and session traffic in cleartext over the wire."
+  fix:
+    ufw: "ufw deny 23"
+    config: "Disable telnetd and migrate to SSH with key-based authentication."
+
+- id: vnc-noauth
+  match:
+    service: vnc
+    probe: noauth
+  severity: critical
+  message: "VNC remote desktop accessible without authentication."
+  why: "Remote graphical session accessible to any attacker."
+  fix:
+    ufw: "ufw deny 5900:5910"
+    config: "Require strong VNC password or tunnel strictly through SSH."
+
+- id: rdp-exposed
+  match:
+    service: rdp
+    probe: open
+  severity: medium
+  message: "Remote Desktop Protocol (RDP) port is directly accessible."
+  why: "Exposed RDP is continuously targeted by automated ransomware and brute-force scanners."
+  fix:
+    ufw: "ufw deny 3389"
+    config: "Enable NLA, use a VPN or SSH tunnel instead of exposing 3389 directly."
+
+- id: ssh-password-auth
+  match:
+    service: ssh
+    probe: password_allowed
+  severity: low
+  message: "SSH server offers password authentication."
+  why: "Password authentication is susceptible to automated dictionary and brute-force attacks."
+  fix:
+    config: "PasswordAuthentication no\nPubkeyAuthentication yes"
+
+- id: http-expired-cert
+  match:
+    service: http
+    probe: expired_cert
+  severity: medium
+  message: "TLS/SSL certificate is expired or invalid."
+  why: "Users receive security warnings and traffic integrity cannot be assured."
+  fix:
+    config: "certbot renew --force-renewal"
+
+- id: unexpected-port
+  match:
+    special: unexpected_port
+  severity: medium
+  message: "Port is exposed but not allowed or expected in host profile."
+  why: "Exposing unexpected ports increases the attack surface beyond intentional services."
+  fix:
+    ufw: "ufw deny <port>"
+
+- id: missing-expected
+  match:
+    special: missing_expected
+  severity: info
+  message: "Expected service port is not currently responding or open."
+  why: "Service might be stopped, crashed, or improperly configured."
+  fix:
+    config: "systemctl status <service>"

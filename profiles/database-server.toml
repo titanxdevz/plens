@@ -1,0 +1,6 @@
+name = "database-server"
+description = "Dedicated database server profile"
+expected_ports = [22]
+allowed_port_ranges = []
+allowed_source_ranges = ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
+local_only_services = ["mysql", "mariadb", "postgresql", "redis", "mongodb", "elasticsearch"]

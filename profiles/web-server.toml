@@ -1,0 +1,6 @@
+name = "web-server"
+description = "Standard web server profile (HTTP/HTTPS exposed, administration restricted)"
+expected_ports = [80, 443]
+allowed_port_ranges = []
+allowed_source_ranges = ["0.0.0.0/0"]
+local_only_services = ["mysql", "mariadb", "postgresql", "redis", "memcached"]

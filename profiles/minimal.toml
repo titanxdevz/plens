@@ -1,0 +1,6 @@
+name = "minimal"
+description = "Hardened minimal node profile (only SSH expected)"
+expected_ports = [22]
+allowed_port_ranges = []
+allowed_source_ranges = ["0.0.0.0/0"]
+local_only_services = []

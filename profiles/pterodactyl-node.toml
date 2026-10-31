@@ -1,0 +1,6 @@
+name = "pterodactyl-node"
+description = "Pterodactyl Wings Daemon / game node profile (Wings API, SFTP, allocated game/bot port ranges)"
+expected_ports = [8080, 2022]
+allowed_port_ranges = ["25565-25600", "27015-27030", "7777-7780"]
+allowed_source_ranges = ["0.0.0.0/0"]
+local_only_services = ["docker"]

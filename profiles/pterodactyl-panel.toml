@@ -1,0 +1,6 @@
+name = "pterodactyl-panel"
+description = "Pterodactyl Web Panel hosting profile (HTTP/HTTPS exposed, database local-only)"
+expected_ports = [80, 443]
+allowed_port_ranges = []
+allowed_source_ranges = ["0.0.0.0/0"]
+local_only_services = ["mysql", "mariadb", "redis"]
